@@ -30,7 +30,7 @@ public:
 	
 	
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bDead;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
