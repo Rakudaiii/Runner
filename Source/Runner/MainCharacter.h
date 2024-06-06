@@ -24,17 +24,23 @@ public:
 
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
-	void DeadKeyPressed();
-	void LiveKeyReleased();
+	void MoveLeft();
+	void MoveRight();
+	void UpdateLanePosition();
+	
+	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bDead;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bDead;
-	
+	float LaneWidth;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int CurrentLane;
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	
 
 public:	

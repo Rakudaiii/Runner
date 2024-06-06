@@ -26,6 +26,7 @@ AMainCharacter::AMainCharacter()
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength = 450.0f;
+	CameraBoom->SetRelativeLocation(FVector(0.0f,0.0f,60.0f));
 	CameraBoom->bUsePawnControlRotation = true;
 
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -41,6 +42,9 @@ AMainCharacter::AMainCharacter()
 	
 	this->bDead = false;
 
+	LaneWidth = 200.0f;
+	CurrentLane = 1;
+
 }
 
 
@@ -49,7 +53,7 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	
 	
 }
@@ -59,6 +63,10 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
+	MoveForward(1.0f);
+	
+
 }
 
 // Called to bind functionality to input
@@ -66,18 +74,12 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("MoveLeft", IE_Pressed, this, &AMainCharacter::MoveLeft);
+	PlayerInputComponent->BindAction("MoveRight", IE_Pressed, this, &AMainCharacter::MoveRight);
 
-	
-	PlayerInputComponent->BindAxis("MoveForward", this, &AMainCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
-
-	PlayerInputComponent->BindAction("Dead", IE_Pressed, this, &AMainCharacter::DeadKeyPressed);
-	PlayerInputComponent->BindAction("Dead", IE_Released, this, &AMainCharacter::LiveKeyReleased);
 	
 }
 
@@ -85,7 +87,7 @@ void AMainCharacter::MoveForward(float Axis)
 {
 	if ((Controller != NULL) && (Axis != 0.0f) && (bDead != true))
 	{
-		//ïîëó÷àåì óãîë íàïðîâëåíèå êàìåðû ïî îñó Yaw
+		
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0,Rotation.Yaw,0);
 
@@ -99,14 +101,36 @@ void AMainCharacter::MoveRight(float Axis)
 {
 	if ((Controller != NULL) && (Axis != 0.0f) && (bDead != true))
 	{
-		
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		const FVector Direction = FVector::ForwardVector;
 		AddMovementInput(Direction, Axis);
 	}
+}
+
+void AMainCharacter::MoveLeft()
+{
+	if (CurrentLane > 0)
+	{
+		CurrentLane--;
+		UpdateLanePosition();
+	}
+}
+
+void AMainCharacter::MoveRight()
+{
+	if (CurrentLane < 2)
+	{
+		CurrentLane++;
+		UpdateLanePosition();
+	}
+}
+
+void AMainCharacter::UpdateLanePosition()
+{
+	float TargetX = (CurrentLane - 1) * LaneWidth;
+	FVector NewLocation = GetActorLocation();
+	NewLocation.X = TargetX;
+	SetActorLocation(NewLocation);
+	
 }
 
 
